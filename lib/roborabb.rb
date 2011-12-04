@@ -35,23 +35,10 @@ class Roborabb
         lower = self.class.expand(hashslice(bar, :kick, :snare))
         upper = self.class.expand(hashslice(bar, :hihat))
 
-        mappings = {
-          kick:  'bd',
-          snare: 'sn',
-          hihat: 'hh'
-        }
-
-        upper_notes = upper.map do |note|
-          raise note.inspect if note[0].length != 1
-          mappings[note[0][0]] + duration(note[1]).to_s
-        end.join(" ")
-
-        lower_notes = lower.map do |note|
-          raise note.inspect if note[0].length != 1
-          mappings[note[0][0]] + duration(note[1]).to_s
-        end.join(" ")
-
-        [upper_notes, lower_notes]
+        [
+          format_notes(upper),
+          format_notes(lower)
+        ]
       end
 
       upper_notes = score.map(&:first).join(' ')
@@ -62,6 +49,21 @@ class Roborabb
           \\new DrumVoice { \\stemDown \\drummode { #{lower_notes} } \\bar "|."}
         >>
       LP
+    end
+
+    def mappings
+      {
+        kick:  'bd',
+        snare: 'sn',
+        hihat: 'hh'
+      }
+    end
+
+    def format_notes(notes)
+      notes.map do |note|
+        raise note.inspect if note[0].length != 1
+        mappings[note[0][0]] + duration(note[1]).to_s
+      end.join(" ")
     end
 
     def hashslice(hash, *keep_keys)
