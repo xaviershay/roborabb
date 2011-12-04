@@ -6,9 +6,12 @@ rock_1 = Roborabb.construct(
   beat_subdivisions: 2,
   lines: {
     hihat: L{|env| true },
-    kick:  L{|env| env.beat % 2 == 0 && env.subdivision == 0},
+    kick:  L{|env|
+      (env.beat % 2 == 0 && env.subdivision == 0) ||
+      ((env.subdivision == 1) && rand > 0.6)
+    },
     snare: L{|env| env.beat % 2 == 1 && env.subdivision == 0},
   }
 )
 
-puts Roborabb::Lilypond.new(rock_1, bars: 2).to_lilypond
+puts Roborabb::Lilypond.new(rock_1, bars: 16).to_lilypond
