@@ -29,7 +29,7 @@ class Roborabb
     end
 
     def to_lilypond
-      opts[:bars].times.map do
+      score = opts[:bars].times.map do
         bar = generator.next
 
         lower = self.class.expand(hashslice(bar, :kick, :snare))
@@ -51,13 +51,17 @@ class Roborabb
           mappings[note[0][0]] + duration(note[1]).to_s
         end.join(" ")
 
-        <<-LP
-          \\new DrumStaff <<
-            \\new DrumVoice { \\stemUp   \\drummode { #{upper_notes} } }
-            \\new DrumVoice { \\stemDown \\drummode { #{lower_notes} }}
-          >>
-        LP
-      end.join
+        [upper_notes, lower_notes]
+      end
+
+      upper_notes = score.map(&:first).join(' ')
+      lower_notes = score.map(&:last).join(' ')
+      <<-LP
+        \\new DrumStaff <<
+          \\new DrumVoice { \\stemUp   \\drummode { #{upper_notes} } }
+          \\new DrumVoice { \\stemDown \\drummode { #{lower_notes} }}
+        >>
+      LP
     end
 
     def hashslice(hash, *keep_keys)

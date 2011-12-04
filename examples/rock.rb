@@ -11,4 +11,4 @@ rock_1 = Roborabb.construct(
   }
 )
 
-puts Roborabb::Lilypond.new(rock_1, bars: 1).to_lilypond
+puts Roborabb::Lilypond.new(rock_1, bars: 2).to_lilypond

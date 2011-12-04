@@ -46,17 +46,32 @@ describe Roborabb do
     }
   end
 
-  it 'outputs lilypond code' do
-    rabb = Roborabb.construct(
-      bar_length: 2,
-      beat_subdivisions: 2,
-      lines: {
-        kick:  L{|env| env.beat % 2 == 0 && env.subdivision == 0},
-        snare: L{|env| env.beat % 2 == 1 && env.subdivision == 0},
-      }
-    )
-    output = Roborabb::Lilypond.new(rabb, bars: 1).to_lilypond
-    output.should include('bd4 sn4')
+  describe 'lilypond output' do
+    it 'outputs lilypond code' do
+      rabb = Roborabb.construct(
+        bar_length: 2,
+        beat_subdivisions: 2,
+        lines: {
+          kick:  L{|env| env.beat % 2 == 0 && env.subdivision == 0},
+          snare: L{|env| env.beat % 2 == 1 && env.subdivision == 0},
+        }
+      )
+      output = Roborabb::Lilypond.new(rabb, bars: 1).to_lilypond
+      output.should include('bd4 sn4')
+    end
+
+    it 'outputs more than one bar' do
+      rabb = Roborabb.construct(
+        bar_length: 2,
+        beat_subdivisions: 2,
+        lines: {
+          kick:  L{|env| env.beat % 2 == 0 && env.subdivision == 0},
+          snare: L{|env| env.beat % 2 == 1 && env.subdivision == 0},
+        }
+      )
+      output = Roborabb::Lilypond.new(rabb, bars: 2).to_lilypond
+      output.should include('bd4 sn4 bd4 sn4')
+    end
   end
 end
 
