@@ -7,11 +7,20 @@ class Roborabb < Struct.new(:opts)
   class Bar < Struct.new(:notes, :subdivisions, :unit, :time_signature, :beat_structure)
   end
 
+  def resolve(x, i)
+    if x.respond_to?(:call)
+      x.call(i)
+    else
+      x
+    end
+  end
+
   def each
     @each ||= Enumerator.new do |yielder|
+      i = 0
       while true
         empty_notes = Hash[opts[:lines].keys.map {|x| [x, []] }]
-        notes = (0..opts[:subdivisions]-1).inject(empty_notes) do |notes, index|
+        notes = (0..resolve(opts[:subdivisions], i)-1).inject(empty_notes) do |notes, index|
           env = OpenStruct.new(
             subdivision: index
           )
@@ -20,7 +29,8 @@ class Roborabb < Struct.new(:opts)
           end
           notes
         end
-        yielder.yield(Bar.new(notes, *opts.values_at(:subdivisions, :unit, :time_signature, :beat_structure)))
+        yielder.yield(Bar.new(notes, *opts.values_at(:subdivisions, :unit, :time_signature, :beat_structure).map {|x| resolve(x, i) }))
+        i += 1
       end
     end
   end
