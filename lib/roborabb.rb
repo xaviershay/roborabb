@@ -3,7 +3,7 @@ alias :L :lambda
 
 class Roborabb2
   class Bar
-    ATTRIBUTES = [:notes, :subdivisions]
+    ATTRIBUTES = [:notes, :subdivisions, :unit]
     attr_reader *ATTRIBUTES
 
     def initialize(attributes)
@@ -53,6 +53,7 @@ class Roborabb2
 
     Bar.new(
       subdivisions: subdivisions.max + 1,
+      unit:         resolve(plan.unit, bar_env),
       notes:        notes
     )
   end

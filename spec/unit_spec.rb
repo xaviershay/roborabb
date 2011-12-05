@@ -9,6 +9,7 @@ describe Roborabb2 do
   def construct(attributes)
     Roborabb2.construct({
       subdivisions: 2,
+      unit:         8,
       notes:        {}
     }.merge(attributes))
   end
@@ -63,6 +64,16 @@ describe Roborabb2 do
     it 'includes subdivisons in returned object' do
       rabb = construct(subdivisions: 2)
       rabb.next.subdivisions.should == 2
+    end
+
+    it 'includes unit in returned object' do
+      rabb = construct(unit: 8)
+      rabb.next.unit.should == 8
+    end
+
+    it 'includes generated unit in returned object' do
+      rabb = construct(unit: L{|e| 8 })
+      rabb.next.unit.should == 8
     end
   end
 
