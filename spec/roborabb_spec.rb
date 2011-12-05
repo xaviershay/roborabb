@@ -8,8 +8,7 @@ describe Roborabb do
 
   it 'can generate a simple beat' do
     rabb = Roborabb.construct(
-      bar_length: 1,
-      beat_subdivisions: 1,
+      subdivisions: 1,
       lines: {
         hihat: L{|env| true },
         snare: L{|env| false }
@@ -22,43 +21,29 @@ describe Roborabb do
     }
   end
 
-  it 'yields beat number to generators' do
-    rabb = Roborabb.construct(
-      bar_length: 2,
-      beat_subdivisions: 2,
-      lines: {
-        beats:        L{|env| env.beat },
-      }
-    )
-
-    notes(rabb).should == {
-      beats: [0, 0, 1, 1]
-    }
-  end
-
   it 'yields subdivision number to generators' do
     rabb = Roborabb.construct(
-      bar_length: 2,
-      beat_subdivisions: 2,
+      subdivisions: 3,
       lines: {
         subdivisions: L{|env| env.subdivision },
       }
     )
 
     notes(rabb).should == {
-      subdivisions: [0, 1, 0, 1],
+      subdivisions: [0, 1, 2]
     }
   end
 
   describe 'lilypond output' do
     it 'outputs a basic rock beat' do
       rabb = Roborabb.construct(
-        bar_length: 2,
-        beat_subdivisions: 2,
+        subdivisions:   8,
+        unit:           8,
+        time_signature: "4/4",
         lines: {
           hihat: L{|env| true },
-          kick:  L{|env| env.beat % 2 == 0 && env.subdivision == 0},
-          snare: L{|env| env.beat % 2 == 1 && env.subdivision == 0},
+          kick: L{|env| (env.subdivision + 0) % 4 == 0 },
+          snare: L{|env| (env.subdivision + 2) % 4 == 0 },
         }
       )
       output = Roborabb::Lilypond.new(rabb, bars: 2).to_lilypond.lines.map(&:chomp).join
