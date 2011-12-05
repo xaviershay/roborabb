@@ -6,7 +6,7 @@ describe Roborabb2 do
     rabb.next.notes
   end
 
-  describe '.construct' do
+  describe '#next' do
     it 'allows a value for notes' do
       rabb = Roborabb2.construct(
         subdivisions: 2,
