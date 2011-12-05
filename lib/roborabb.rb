@@ -34,7 +34,7 @@ class Roborabb2
       env = build_env(subdivision)
 
       plan.notes.map do |name, f|
-        notes[name] << f.call(env)
+        notes[name] << resolve(f, env)
       end
 
       notes
@@ -43,6 +43,14 @@ class Roborabb2
     Bar.new(
       notes: notes
     )
+  end
+
+  def resolve(f, env)
+    if f.respond_to?(:call)
+      f.call(env)
+    else
+      f
+    end
   end
 
   def subdivisions

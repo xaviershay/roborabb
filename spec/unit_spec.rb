@@ -8,7 +8,20 @@ describe Roborabb2 do
   end
 
   describe '.construct' do
-    it 'yields subdivision number to generators' do
+    it 'allows a value for notes' do
+      rabb = Roborabb2.construct(
+        subdivisions: 2,
+        notes: {
+          subdivisions: 'A'
+        }
+      )
+
+      notes(rabb).should == {
+        subdivisions: ['A', 'A']
+      }
+    end
+
+    it 'yields subdivision number to notes' do
       rabb = Roborabb2.construct(
         subdivisions: 3,
         notes: {
