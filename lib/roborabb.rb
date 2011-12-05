@@ -14,11 +14,11 @@ class Roborabb2
 
   def initialize(plan_hash)
     self.plan       = OpenStruct.new(plan_hash)
-    self.bar_env    = OpenStruct.new(bar: 0)
+    self.bar_env    = OpenStruct.new(index: 0)
     self.enumerator = Enumerator.new do |yielder|
       loop do
         yielder.yield(generate_bar)
-        bar_env.bar += 1
+        bar_env.index += 1
       end
     end
   end
@@ -70,7 +70,8 @@ class Roborabb2
 
   def build_env(subdivision)
     OpenStruct.new(
-      subdivision: subdivision
+      subdivision: subdivision,
+      bar:         bar_env
     )
   end
 

@@ -36,7 +36,7 @@ describe Roborabb2 do
 
     it 'includes bar number in env yielded to config' do
       rabb = Roborabb2.construct(
-        subdivisions: :bar.to_proc,
+        subdivisions: :index.to_proc,
         notes: { a: 1 }
       )
 
@@ -44,6 +44,19 @@ describe Roborabb2 do
         { a: [] },
         { a: [1] },
         { a: [1, 1] }
+      ]
+    end
+
+    it 'includes bar number in env yielded to notes' do
+      rabb = Roborabb2.construct(
+        subdivisions: 2,
+        notes: { a: L{|e| e.bar.index } }
+      )
+
+      3.times.map { notes(rabb) }.should == [
+        { a: [0, 0] },
+        { a: [1, 1] },
+        { a: [2, 2] }
       ]
     end
   end
