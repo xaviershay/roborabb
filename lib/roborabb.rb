@@ -46,8 +46,14 @@ class Roborabb
       <<-LP
         \\version "2.14.2"
         \\new DrumStaff <<
-          \\new DrumVoice { \\stemUp   \\drummode { #{upper_notes} } \\bar "|."}
-          \\new DrumVoice { \\stemDown \\drummode { #{lower_notes} } \\bar "|."}
+          \\new DrumVoice {
+            \\override Rest #'direction = #up
+            \\stemUp   \\drummode {
+#{upper_notes} } \\bar "|."}
+          \\new DrumVoice {
+            \\override Rest #'direction = #down
+            \\stemDown \\drummode {
+#{lower_notes} } \\bar "|."}
         >>
       LP
     end
