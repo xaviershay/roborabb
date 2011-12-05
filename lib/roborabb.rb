@@ -25,7 +25,7 @@ class Roborabb
   class Lilypond < Struct.new(:generator, :opts)
     # Totally incomplete implementation
     def duration(x)
-      8 / x
+      %w(8 4 4. 2)[x-1] || raise("Unsupported duration: #{x}")
     end
 
     def to_lilypond
@@ -61,8 +61,16 @@ class Roborabb
 
     def format_notes(notes)
       notes.map do |note|
-        raise note.inspect if note[0].length != 1
-        mappings[note[0][0]] + duration(note[1]).to_s
+        if note[0].length == 1
+          mappings[note[0][0]] + duration(note[1]).to_s
+        elsif note[0].length > 1
+          "<%s>%s" % [
+            note[0].map {|x| mappings[x] }.join(' '),
+            duration(note[1])
+          ]
+        else
+          "r%s" % duration(note[1])
+        end
       end.join(" ")
     end
 
@@ -81,7 +89,7 @@ class Roborabb
           notes.keys[i] if x
         end.compact
 
-        if !on.empty?
+        if !on.empty? || time >= 4
           if time > 0
             out << [accum, time]
           end
