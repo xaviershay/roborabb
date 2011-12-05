@@ -15,22 +15,7 @@ class Roborabb2
   def initialize(plan_hash)
     self.plan = OpenStruct.new(plan_hash)
     self.enumerator = Enumerator.new do |yielder|
-      notes = (0..plan.subdivisions-1).map do |subdivision|
-        env = OpenStruct.new(
-          subdivision: subdivision
-        )
-        Hash[plan.notes.map do |name, f|
-          [name, f.call(env)]
-        end]
-      end
-      notes = notes.reduce do |a, v|
-        a.merge(v) {|key, old, new|
-          [*old] << new
-        }
-      end
-      yielder.yield Bar.new(
-        notes: notes
-      )
+      yielder.yield generate_bar
     end
   end
 
@@ -43,6 +28,39 @@ class Roborabb2
   end
 
   protected
+
+  def generate_bar
+    notes = subdivisions.inject(empty_notes) do |notes, subdivision|
+      env = build_env(subdivision)
+
+      plan.notes.map do |name, f|
+        notes[name] << f.call(env)
+      end
+
+      notes
+    end
+
+    Bar.new(
+      notes: notes
+    )
+  end
+
+  def subdivisions
+    (0..plan.subdivisions-1)
+  end
+
+  def empty_notes
+    x = plan.notes.keys.map do |name|
+      [name, []]
+    end
+    Hash[x]
+  end
+
+  def build_env(subdivision)
+    OpenStruct.new(
+      subdivision: subdivision
+    )
+  end
 
   attr_writer :plan
   attr_accessor :enumerator
