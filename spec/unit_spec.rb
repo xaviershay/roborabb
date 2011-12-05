@@ -6,9 +6,16 @@ describe Roborabb2 do
     rabb.next.notes
   end
 
+  def construct(attributes)
+    Roborabb2.construct({
+      subdivisions: 2,
+      notes:        {}
+    }.merge(attributes))
+  end
+
   describe '#next' do
     it 'allows a value for notes' do
-      rabb = Roborabb2.construct(
+      rabb = construct(
         subdivisions: 2,
         notes:        { a: 'A' }
       )
@@ -17,7 +24,7 @@ describe Roborabb2 do
     end
 
     it 'includes subdivision in env yielded to notes' do
-      rabb = Roborabb2.construct(
+      rabb = construct(
         subdivisions: 3,
         notes: {
           a: :subdivision.to_proc
@@ -28,7 +35,7 @@ describe Roborabb2 do
     end
 
     it 'includes bar number in env yielded to config' do
-      rabb = Roborabb2.construct(
+      rabb = construct(
         subdivisions: L{|e| e.index + 1 },
         notes:        { a: 1 }
       )
@@ -41,7 +48,7 @@ describe Roborabb2 do
     end
 
     it 'includes bar number in env yielded to notes' do
-      rabb = Roborabb2.construct(
+      rabb = construct(
         subdivisions: 2,
         notes:        { a: L{|e| e.bar.index } }
       )
@@ -54,11 +61,7 @@ describe Roborabb2 do
     end
 
     it 'includes subdivisons in returned object' do
-      rabb = Roborabb2.construct(
-        subdivisions: 2,
-        notes:        {}
-      )
-
+      rabb = construct(subdivisions: 2)
       rabb.next.subdivisions.should == 2
     end
   end
