@@ -22,7 +22,8 @@ class Roborabb < Struct.new(:opts)
         empty_notes = Hash[opts[:lines].keys.map {|x| [x, []] }]
         notes = (0..resolve(opts[:subdivisions], i)-1).inject(empty_notes) do |notes, index|
           env = OpenStruct.new(
-            subdivision: index
+            subdivision: index,
+            bar:         i
           )
           opts[:lines].map do |key, f|
             notes[key] << f[env]
