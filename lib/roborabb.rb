@@ -13,9 +13,13 @@ class Roborabb2
   attr_reader :plan
 
   def initialize(plan_hash)
-    self.plan = OpenStruct.new(plan_hash)
+    self.plan       = OpenStruct.new(plan_hash)
+    self.bar_env    = OpenStruct.new(bar: 0)
     self.enumerator = Enumerator.new do |yielder|
-      yielder.yield generate_bar
+      loop do
+        yielder.yield(generate_bar)
+        bar_env.bar += 1
+      end
     end
   end
 
@@ -54,7 +58,7 @@ class Roborabb2
   end
 
   def subdivisions
-    (0..plan.subdivisions-1)
+    (0..resolve(plan.subdivisions, bar_env)-1)
   end
 
   def empty_notes
@@ -72,6 +76,7 @@ class Roborabb2
 
   attr_writer :plan
   attr_accessor :enumerator
+  attr_accessor :bar_env
 end
 
 class Roborabb < Struct.new(:opts)
