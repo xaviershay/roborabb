@@ -2,22 +2,25 @@ require 'ostruct'
 alias :L :lambda
 
 class Roborabb
+  class Bar < Struct.new(:notes)
+  end
+
   def self.construct(opts)
     Enumerator.new do |yielder|
       total_subdivisions = opts[:bar_length] * opts[:beat_subdivisions]
       while true
-        empty_bar = Hash[opts[:lines].keys.map {|x| [x, []] }]
-        bar = (0..total_subdivisions-1).inject(empty_bar) do |bar, index|
+        empty_notes = Hash[opts[:lines].keys.map {|x| [x, []] }]
+        notes = (0..total_subdivisions-1).inject(empty_notes) do |notes, index|
           env = OpenStruct.new(
             beat:       index / opts[:beat_subdivisions],
             subdivision: index % opts[:beat_subdivisions]
           )
           opts[:lines].map do |key, f|
-            bar[key] << f[env]
+            notes[key] << f[env]
           end
-          bar
+          notes
         end
-        yielder.yield(bar)
+        yielder.yield(Bar.new(notes))
       end
     end
   end
@@ -30,7 +33,7 @@ class Roborabb
 
     def to_lilypond
       score = opts[:bars].times.map do
-        bar = generator.next
+        bar = generator.next.notes
 
         lower = self.class.expand(hashslice(bar, :kick, :snare))
         upper = self.class.expand(hashslice(bar, :hihat))

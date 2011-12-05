@@ -2,6 +2,10 @@ $LOAD_PATH.unshift(File.expand_path("../../lib", __FILE__))
 require 'roborabb'
 
 describe Roborabb do
+  def notes(rabb)
+    rabb.next.notes
+  end
+
   it 'can generate a simple beat' do
     rabb = Roborabb.construct(
       bar_length: 1,
@@ -12,7 +16,7 @@ describe Roborabb do
       }
     )
 
-    rabb.next.should == {
+    notes(rabb).should == {
       hihat: [true],
       snare: [false]
     }
@@ -27,7 +31,7 @@ describe Roborabb do
       }
     )
 
-    rabb.next.should == {
+    notes(rabb).should == {
       beats: [0, 0, 1, 1]
     }
   end
@@ -41,7 +45,7 @@ describe Roborabb do
       }
     )
 
-    rabb.next.should == {
+    notes(rabb).should == {
       subdivisions: [0, 1, 0, 1],
     }
   end
