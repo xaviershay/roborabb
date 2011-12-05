@@ -44,6 +44,7 @@ class Roborabb
       upper_notes = score.map(&:first).join(" |\n ")
       lower_notes = score.map(&:last).join(" |\n ")
       <<-LP
+        \\version "2.14.2"
         \\new DrumStaff <<
           \\new DrumVoice { \\stemUp   \\drummode { #{upper_notes} } \\bar "|."}
           \\new DrumVoice { \\stemDown \\drummode { #{lower_notes} } \\bar "|."}
