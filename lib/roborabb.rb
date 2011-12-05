@@ -3,11 +3,18 @@ alias :L :lambda
 
 class Roborabb2
   class Bar
-    attr_accessor :notes
+    ATTRIBUTES = [:notes, :subdivisions]
+    attr_reader *ATTRIBUTES
 
     def initialize(attributes)
-      self.notes = attributes.fetch(:notes)
+      ATTRIBUTES.each do |x|
+        send("#{x}=", attributes.fetch(x))
+      end
     end
+
+    protected
+
+    attr_writer *ATTRIBUTES
   end
 
   attr_reader :plan
@@ -45,7 +52,8 @@ class Roborabb2
     end
 
     Bar.new(
-      notes: notes
+      subdivisions: subdivisions.max + 1,
+      notes:        notes
     )
   end
 
@@ -58,7 +66,7 @@ class Roborabb2
   end
 
   def subdivisions
-    (0..resolve(plan.subdivisions, bar_env)-1)
+    (0...resolve(plan.subdivisions, bar_env))
   end
 
   def empty_notes
