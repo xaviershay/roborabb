@@ -57,9 +57,9 @@ describe Roborabb do
           snare: L{|env| env.beat % 2 == 1 && env.subdivision == 0},
         }
       )
-      output = Roborabb::Lilypond.new(rabb, bars: 2).to_lilypond
-      output.should include('hh8 ' * 8)
-      output.should include('bd4 sn4 bd4 sn4')
+      output = Roborabb::Lilypond.new(rabb, bars: 2).to_lilypond.lines.map(&:chomp).join
+      output.should include('hh8 hh8 hh8 hh8 | hh8 hh8 hh8 hh8')
+      output.should include('bd4 sn4 | bd4 sn4')
     end
   end
 end

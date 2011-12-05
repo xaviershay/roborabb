@@ -41,8 +41,8 @@ class Roborabb
         ]
       end
 
-      upper_notes = score.map(&:first).join(' ')
-      lower_notes = score.map(&:last).join(' ')
+      upper_notes = score.map(&:first).join(" |\n ")
+      lower_notes = score.map(&:last).join(" |\n ")
       <<-LP
         \\new DrumStaff <<
           \\new DrumVoice { \\stemUp   \\drummode { #{upper_notes} } \\bar "|."}
