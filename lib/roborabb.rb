@@ -1,6 +1,53 @@
 require 'ostruct'
 alias :L :lambda
 
+class Roborabb2
+  class Bar
+    attr_accessor :notes
+
+    def initialize(attributes)
+      self.notes = attributes.fetch(:notes)
+    end
+  end
+
+  attr_reader :plan
+
+  def initialize(plan_hash)
+    self.plan = OpenStruct.new(plan_hash)
+    self.enumerator = Enumerator.new do |yielder|
+      notes = (0..plan.subdivisions-1).map do |subdivision|
+        env = OpenStruct.new(
+          subdivision: subdivision
+        )
+        Hash[plan.notes.map do |name, f|
+          [name, f.call(env)]
+        end]
+      end
+      notes = notes.reduce do |a, v|
+        a.merge(v) {|key, old, new|
+          [*old] << new
+        }
+      end
+      yielder.yield Bar.new(
+        notes: notes
+      )
+    end
+  end
+
+  def next
+    enumerator.next
+  end
+
+  def self.construct(plan)
+    new(plan)
+  end
+
+  protected
+
+  attr_writer :plan
+  attr_accessor :enumerator
+end
+
 class Roborabb < Struct.new(:opts)
   include Enumerable
 
