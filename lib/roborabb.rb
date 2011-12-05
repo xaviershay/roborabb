@@ -3,12 +3,12 @@ alias :L :lambda
 
 class Roborabb2
   class Bar
-    ATTRIBUTES = [:notes, :subdivisions, :unit]
+    ATTRIBUTES = [:notes, :subdivisions, :unit, :time_signature, :beat_structure]
     attr_reader *ATTRIBUTES
 
     def initialize(attributes)
       ATTRIBUTES.each do |x|
-        send("#{x}=", attributes.fetch(x))
+        send("#{x}=", attributes[x])
       end
     end
 
@@ -52,9 +52,11 @@ class Roborabb2
     end
 
     Bar.new(
-      subdivisions: subdivisions.max + 1,
-      unit:         resolve(plan.unit, bar_env),
-      notes:        notes
+      subdivisions:   subdivisions.max + 1,
+      unit:           resolve(plan.unit, bar_env),
+      time_signature: resolve(plan.time_signature, bar_env),
+      beat_structure: resolve(plan.beat_structure, bar_env),
+      notes:          notes
     )
   end
 

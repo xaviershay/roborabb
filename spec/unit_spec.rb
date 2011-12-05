@@ -8,9 +8,10 @@ describe Roborabb2 do
 
   def construct(attributes)
     Roborabb2.construct({
-      subdivisions: 2,
-      unit:         8,
-      notes:        {}
+      subdivisions:   2,
+      unit:           8,
+      time_signature: '1/4',
+      notes:          {}
     }.merge(attributes))
   end
 
@@ -74,6 +75,26 @@ describe Roborabb2 do
     it 'includes generated unit in returned object' do
       rabb = construct(unit: L{|e| 8 })
       rabb.next.unit.should == 8
+    end
+
+    it 'includes time_signature in returned object' do
+      rabb = construct(time_signature: "7/8")
+      rabb.next.time_signature.should == "7/8"
+    end
+
+    it 'includes generated time_signature in returned object' do
+      rabb = construct(time_signature: L{|e| "7/8" })
+      rabb.next.time_signature.should == "7/8"
+    end
+
+    it 'includes beat_structure in returned object' do
+      rabb = construct(beat_structure: [3, 2, 2])
+      rabb.next.beat_structure.should == [3, 2, 2]
+    end
+
+    it 'includes generated beat_structure in returned object' do
+      rabb = construct(beat_structure: L{|e| [3, 2, 2] })
+      rabb.next.beat_structure.should == [3, 2, 2]
     end
   end
 
