@@ -102,7 +102,7 @@ end
 
 describe Roborabb2::Lilypond do
   describe '#to_lilypond' do
-    def bar(attributes)
+    def bar(attributes = {})
       double("Bar", {
         unit:           8,
         notes:          {hihat: [true]},
@@ -212,6 +212,12 @@ describe Roborabb2::Lilypond do
       bars[0].should     include(%(\\set Staff.beatStructure = #'(3 2)))
       bars[1].should_not include(%(\\set Staff.beatStructure))
       bars[2].should     include(%(\\set Staff.beatStructure = #'(2 3)))
+    end
+
+    it 'includes a final double bar line' do
+      generator = [bar].each
+      formatter = described_class.new(generator, bars: 1)
+      formatter.to_lilypond.should include('\\bar "|."')
     end
   end
 end
