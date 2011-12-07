@@ -111,16 +111,19 @@ describe Roborabb2::Lilypond do
       }.merge(attributes))
     end
 
+    def output(generator, opts = {bars: 1})
+      formatter = described_class.new(generator.each, opts)
+      formatter.to_lilypond
+    end
+
     it 'outputs rests' do
-      generator = [bar(unit: 8, notes: {hihat: [false]})].each
-      formatter = described_class.new(generator, bars: 1)
-      formatter.to_lilypond.should include("r8")
+      generator = [bar(notes: {hihat: [false]})]
+      output(generator).should include("r")
     end
 
     it 'outputs hihats' do
-      generator = [bar(unit: 8, notes: {hihat: [true]})].each
-      formatter = described_class.new(generator, bars: 1)
-      formatter.to_lilypond.should include("hh8")
+      generator = [bar(notes: {hihat: [true]})]
+      output(generator).should include("hh")
     end
 
     it 'calculates durations correctly to a maximum of four units' do
@@ -130,36 +133,33 @@ describe Roborabb2::Lilypond do
         [true] + [false] * 2 +
         [true] + [false] * 3 +
         [true] + [false] * 4
-      })].each
+      })]
 
-      formatter = described_class.new(generator, bars: 1)
-      formatter.to_lilypond.should include("hh32 hh16 hh16. hh8 hh8 r32")
+      output(generator).should include("hh32 hh16 hh16. hh8 hh8 r32")
     end
 
     it 'outputs kicks and snares' do
-      generator = [bar(unit: 4, notes: {kick: [true, false], snare: [false, true]})].each
-      formatter = described_class.new(generator, bars: 1)
-      formatter.to_lilypond.should include("bd4 sn4")
+      generator = [bar(unit: 4, notes: {
+        kick:  [true, false],
+        snare: [false, true]
+      })]
+      output(generator).should include("bd4 sn4")
     end
 
     it 'can output two notes at the same time' do
-      generator = [bar(unit: 4, notes: {kick: [true], snare: [true]})].each
-      formatter = described_class.new(generator, bars: 1)
-      formatter.to_lilypond.should include("<bd sn>4")
+      generator = [bar(unit: 4, notes: {kick: [true], snare: [true]})]
+      output(generator).should include("<bd sn>4")
     end
 
     it 'can output a rest before a note' do
-      generator = [bar(unit: 8, notes: {hihat: [false, true]})].each
-      formatter = described_class.new(generator, bars: 1)
-      formatter.to_lilypond.should include("r8 hh8")
+      generator = [bar(unit: 8, notes: {hihat: [false, true]})]
+      output(generator).should include("r8 hh8")
     end
 
     it 'includes lilypond preamble' do
-      generator = [bar(unit: 8, notes: {})].each
-      formatter = described_class.new(generator, bars: 1)
-      output = formatter.to_lilypond
-      output.should include("\\version")
-      output.should include("\\new DrumStaff")
+      lilypond = output([bar])
+      lilypond.should include("\\version")
+      lilypond.should include("\\new DrumStaff")
     end
 
     it 'places hihats and kick/snare in different voices' do
@@ -167,10 +167,8 @@ describe Roborabb2::Lilypond do
         hihat: [true, true],
         kick:  [true, false],
         snare: [false, true]
-      })].each
-      formatter = described_class.new(generator, bars: 1)
-      output = formatter.to_lilypond
-      voices = output.split("\\new DrumVoice")[1..-1]
+      })]
+      voices = output(generator).split("\\new DrumVoice")[1..-1]
       voices[0].should include("hh8 hh8")
       voices[0].should include("\\override Rest #'direction = #up")
       voices[1].should include("bd8 sn8")
@@ -179,13 +177,12 @@ describe Roborabb2::Lilypond do
 
     it 'includes bar lines' do
       generator = [
-        bar(unit: 8, notes: {hihat: [true] }),
-        bar(unit: 8, notes: {hihat: [false] }),
-      ].each
-      formatter = described_class.new(generator, bars: 2)
-      bars = formatter.to_lilypond.split('|')
-      bars[0].should include('hh8')
-      bars[1].should include('r8')
+        bar(notes: {hihat: [true] }),
+        bar(notes: {hihat: [false] }),
+      ]
+      bars = output(generator, bars: 2).split('|')
+      bars[0].should include('hh')
+      bars[1].should include('r')
     end
 
     it 'includes time signature changes per bar' do
@@ -193,9 +190,8 @@ describe Roborabb2::Lilypond do
         bar(time_signature: "1/8"),
         bar(time_signature: "1/8"),
         bar(time_signature: "1/4"),
-      ].each
-      formatter = described_class.new(generator, bars: 3)
-      bars = formatter.to_lilypond.split('|')
+      ]
+      bars = output(generator, bars: 3).split('|')
       bars[0].should     include(%(\\time "1/8"))
       bars[1].should_not include(%(\\time))
       bars[2].should     include(%(\\time "1/4"))
@@ -206,18 +202,15 @@ describe Roborabb2::Lilypond do
         bar(beat_structure: [3, 2]),
         bar(beat_structure: [3, 2]),
         bar(beat_structure: [2, 3]),
-      ].each
-      formatter = described_class.new(generator, bars: 3)
-      bars = formatter.to_lilypond.split('|')
+      ]
+      bars = output(generator, bars: 3).split('|')
       bars[0].should     include(%(\\set Staff.beatStructure = #'(3 2)))
       bars[1].should_not include(%(\\set Staff.beatStructure))
       bars[2].should     include(%(\\set Staff.beatStructure = #'(2 3)))
     end
 
     it 'includes a final double bar line' do
-      generator = [bar].each
-      formatter = described_class.new(generator, bars: 1)
-      formatter.to_lilypond.should include('\\bar "|."')
+      output([bar]).should include('\\bar "|."')
     end
   end
 end
