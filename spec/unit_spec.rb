@@ -99,3 +99,50 @@ describe Roborabb2 do
   end
 
 end
+
+describe Roborabb2::Lilypond do
+  describe '#to_lilypond' do
+    it 'outputs rests' do
+      generator = [stub(unit: 8, notes: {hihat: [false]})].each
+      formatter = described_class.new(generator, bars: 1)
+      formatter.to_lilypond.should include("r8")
+    end
+
+    it 'outputs hihats' do
+      generator = [stub(unit: 8, notes: {hihat: [true]})].each
+      formatter = described_class.new(generator, bars: 1)
+      formatter.to_lilypond.should include("hh8")
+    end
+
+    it 'calculates durations correctly to a maximum of four units' do
+      generator = [stub(unit: 32, notes: {hihat:
+        [true] +
+        [true] + [false] * 1 +
+        [true] + [false] * 2 +
+        [true] + [false] * 3 +
+        [true] + [false] * 4
+      })].each
+
+      formatter = described_class.new(generator, bars: 1)
+      formatter.to_lilypond.should include("hh32 hh16 hh16. hh8 hh8 r32")
+    end
+
+    it 'outputs kicks and snares' do
+      generator = [stub(unit: 4, notes: {kick: [true, false], snare: [false, true]})].each
+      formatter = described_class.new(generator, bars: 1)
+      formatter.to_lilypond.should include("bd4 sn4")
+    end
+
+    it 'can output two notes at the same time' do
+      generator = [stub(unit: 4, notes: {kick: [true], snare: [true]})].each
+      formatter = described_class.new(generator, bars: 1)
+      formatter.to_lilypond.should include("<bd sn>4")
+    end
+
+    it 'can output a rest before a note' do
+      generator = [stub(unit: 8, notes: {hihat: [false, true]})].each
+      formatter = described_class.new(generator, bars: 1)
+      formatter.to_lilypond.should include("r8 hh8")
+    end
+  end
+end

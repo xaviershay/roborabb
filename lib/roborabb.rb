@@ -2,6 +2,100 @@ require 'ostruct'
 alias :L :lambda
 
 class Roborabb2
+  class Lilypond
+    def initialize(generator, opts)
+      self.generator = generator
+      self.opts      = opts
+    end
+
+    def to_lilypond
+      score = opts[:bars].times.map do
+        bar = generator.next 
+
+        format_bar(bar)
+      end
+
+      score.map {|x| x[:upper] }.join(' ') +
+      score.map {|x| x[:lower] }.join(' ')
+    end
+
+    protected
+
+    attr_accessor :generator, :opts
+
+    def format_bar(bar)
+      {
+        upper: format_notes(bar, expand(hashslice(bar.notes, :hihat))),
+        lower: format_notes(bar, expand(hashslice(bar.notes, :kick, :snare)))
+      }
+    end
+
+    def format_notes(bar, notes)
+      notes.map do |note|
+        if note[0].length == 1
+          mappings[note[0][0]] + duration(bar, note[1]).to_s
+        elsif note[0].length > 1
+          "<%s>%s" % [
+            note[0].map {|x| mappings[x] }.join(' '),
+            duration(bar, note[1])
+          ]
+        else
+          "r%s" % duration(bar, note[1])
+        end
+      end.join(" ")
+    end
+
+    def mappings
+      {
+        kick:  'bd',
+        snare: 'sn',
+        hihat: 'hh'
+      }
+    end
+
+    def duration(bar, x)
+      unit = bar.unit
+      [
+        unit,
+        unit / 2,
+        (unit / 2).to_s + ".",
+        unit / 4
+      ].map(&:to_s)[x-1] || raise("Unsupported duration: #{x}")
+    end
+
+    def hashslice(hash, *keep_keys)
+      h = {}
+      keep_keys.each do |key|
+        h[key] = hash[key] if hash.has_key?(key)
+      end
+      h
+    end
+
+    def expand(notes)
+      accum = []
+      time  = 0
+      out = notes.values.transpose.inject([]) do |out, on_notes|
+        on = [*on_notes].map.with_index do |x, i|
+          notes.keys[i] if x
+        end.compact
+
+        if !on.empty? || time >= 4
+          if time > 0
+            out << [accum, time]
+          end
+          accum = on
+          time = 0
+        end
+        time += 1
+
+        out
+      end
+
+      out << [accum, time] if time > 0
+      out
+    end
+  end
+
   class Bar
     ATTRIBUTES = [:notes, :subdivisions, :unit, :time_signature, :beat_structure]
     attr_reader *ATTRIBUTES
