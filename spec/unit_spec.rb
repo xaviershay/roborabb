@@ -190,14 +190,14 @@ describe Roborabb2::Lilypond do
 
     it 'includes time signature changes per bar' do
       generator = [
-        bar(unit: 8, time_signature: "1/8", notes: {hihat: [true] }),
-        bar(unit: 8, time_signature: "1/8", notes: {hihat: [true] }),
-        bar(unit: 4, time_signature: "1/4", notes: {hihat: [true] }),
+        bar(time_signature: "1/8"),
+        bar(time_signature: "1/8"),
+        bar(time_signature: "1/4"),
       ].each
       formatter = described_class.new(generator, bars: 3)
       bars = formatter.to_lilypond.split('|')
       bars[0].should     include(%(\\time "1/8"))
-      bars[1].should_not include(%(\\time "1/8"))
+      bars[1].should_not include(%(\\time))
       bars[2].should     include(%(\\time "1/4"))
     end
 
