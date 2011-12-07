@@ -28,12 +28,17 @@ class Roborabb2
     def format_bars(bars, voice)
       last_bar = Bar.new({})
       bars.map do |bar|
-        preamble = if last_bar.time_signature != bar[:bar].time_signature
-          %(\\time "#{bar[:bar].time_signature}"\n)
+        preamble = ""
+        if last_bar.time_signature != bar[:bar].time_signature
+          preamble += %(\\time "#{bar[:bar].time_signature}"\n)
+        end
+
+        if last_bar.beat_structure != bar[:bar].beat_structure
+          preamble += %(\\set Staff.beatStructure = #'(%s)\n) % bar[:bar].beat_structure.join(' ')
         end
         last_bar = bar[:bar]
 
-        preamble.to_s + bar[voice]
+        preamble + bar[voice]
       end.join(' | ')
     end
 

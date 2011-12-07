@@ -104,7 +104,10 @@ describe Roborabb2::Lilypond do
   describe '#to_lilypond' do
     def bar(attributes)
       double("Bar", {
-        time_signature: "4/4"
+        unit:           8,
+        notes:          {hihat: [true]},
+        time_signature: "4/4",
+        beat_structure: [4, 4]
       }.merge(attributes))
     end
 
@@ -196,6 +199,19 @@ describe Roborabb2::Lilypond do
       bars[0].should     include(%(\\time "1/8"))
       bars[1].should_not include(%(\\time "1/8"))
       bars[2].should     include(%(\\time "1/4"))
+    end
+
+    it 'includes beat structure changes per bar' do
+      generator = [
+        bar(beat_structure: [3, 2]),
+        bar(beat_structure: [3, 2]),
+        bar(beat_structure: [2, 3]),
+      ].each
+      formatter = described_class.new(generator, bars: 3)
+      bars = formatter.to_lilypond.split('|')
+      bars[0].should     include(%(\\set Staff.beatStructure = #'(3 2)))
+      bars[1].should_not include(%(\\set Staff.beatStructure))
+      bars[2].should     include(%(\\set Staff.beatStructure = #'(2 3)))
     end
   end
 end
