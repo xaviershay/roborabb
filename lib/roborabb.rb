@@ -16,14 +16,26 @@ class Roborabb2
       end
 
       lilypond do
-        voice(:up)   { score.map {|x| x[:upper] }.join(' ') } +
-        voice(:down) { score.map {|x| x[:lower] }.join(' ') }
+        voice(:up)   { format_bars(score, :upper) } +
+        voice(:down) { format_bars(score, :lower) }
       end
     end
 
     protected
 
     attr_accessor :generator, :opts
+
+    def format_bars(bars, voice)
+      last_bar = Bar.new({})
+      bars.map do |bar|
+        preamble = if last_bar.time_signature != bar[:bar].time_signature
+          %(\\time "#{bar[:bar].time_signature}"\n)
+        end
+        last_bar = bar[:bar]
+
+        preamble.to_s + bar[voice]
+      end.join(' | ')
+    end
 
     def lilypond
       <<-LP
@@ -47,6 +59,7 @@ class Roborabb2
 
     def format_bar(bar)
       {
+        bar:   bar,
         upper: format_notes(bar, expand(hashslice(bar.notes, :hihat))),
         lower: format_notes(bar, expand(hashslice(bar.notes, :kick, :snare)))
       }
