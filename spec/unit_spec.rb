@@ -144,5 +144,28 @@ describe Roborabb2::Lilypond do
       formatter = described_class.new(generator, bars: 1)
       formatter.to_lilypond.should include("r8 hh8")
     end
+
+    it 'includes lilypond preamble' do
+      generator = [stub(unit: 8, notes: {})].each
+      formatter = described_class.new(generator, bars: 1)
+      output = formatter.to_lilypond
+      output.should include("\\version")
+      output.should include("\\new DrumStaff")
+    end
+
+    it 'places hihats and kick/snare in different voices' do
+      generator = [stub(unit: 8, notes: {
+        hihat: [true, true],
+        kick:  [true, false],
+        snare: [false, true]
+      })].each
+      formatter = described_class.new(generator, bars: 1)
+      output = formatter.to_lilypond
+      voices = output.split("\\new DrumVoice")[1..-1]
+      voices[0].should include("hh8 hh8")
+      voices[0].should include("\\override Rest #'direction = #up")
+      voices[1].should include("bd8 sn8")
+      voices[1].should include("\\override Rest #'direction = #down")
+    end
   end
 end

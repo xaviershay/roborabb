@@ -15,13 +15,35 @@ class Roborabb2
         format_bar(bar)
       end
 
-      score.map {|x| x[:upper] }.join(' ') +
-      score.map {|x| x[:lower] }.join(' ')
+      lilypond do
+        voice(:up)   { score.map {|x| x[:upper] }.join(' ') } +
+        voice(:down) { score.map {|x| x[:lower] }.join(' ') }
+      end
     end
 
     protected
 
     attr_accessor :generator, :opts
+
+    def lilypond
+      <<-LP
+      \\version "2.14.2"
+      \\new DrumStaff <<
+        #{yield}
+      >>
+      LP
+    end
+
+    def voice(direction)
+      result = <<-LP
+      \\new DrumVoice {
+        \\override Rest #'direction = ##{direction}
+        \\stemUp   \\drummode {
+          #{yield}
+        }
+      }
+      LP
+    end
 
     def format_bar(bar)
       {
