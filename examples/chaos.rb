@@ -12,6 +12,7 @@ templates = [
 bars = 16.times.map { templates.sample }
 
 generator = Roborabb.construct(
+  title:          "Chaos",
   subdivisions:   L{|bar| bars[bar.index % bars.length][0] },
   unit:           L{|bar| bars[bar.index % bars.length][1] },
   time_signature: L{|bar| bars[bar.index % bars.length][2] },

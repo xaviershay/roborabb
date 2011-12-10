@@ -2,6 +2,7 @@ $LOAD_PATH.unshift(File.expand_path("../../lib", __FILE__))
 require 'roborabb'
 
 rock_1 = Roborabb.construct(
+  title:          "Rock",
   subdivisions:   8,
   unit:           8,
   time_signature: "4/4",

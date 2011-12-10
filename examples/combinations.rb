@@ -5,6 +5,7 @@ states       = ([true, false] * 4).combination(4).to_a.uniq
 lower_states = ([0, 1, 2]     * 4).combination(4).to_a.uniq
 
 generator = Roborabb.construct(
+  title:          "Combinations",
   subdivisions:   16,
   unit:           16,
   time_signature: "4/4",
