@@ -1,25 +1,187 @@
-require 'pp'
 require 'ostruct'
 alias :L :lambda
 
-class Roborabb
-  def self.construct(opts)
-    Enumerator.new do |yielder|
-      total_subdivisions = opts[:bar_length] * opts[:beat_subdivisions]
+class Roborabb < Struct.new(:opts)
+  include Enumerable
+
+  class Bar < Struct.new(:notes, :subdivisions, :unit, :time_signature, :beat_structure)
+  end
+
+  def resolve(x, i)
+    if x.respond_to?(:call)
+      x.call(i)
+    else
+      x
+    end
+  end
+
+  def each
+    @each ||= Enumerator.new do |yielder|
+      i = 0
       while true
-        empty_bar = Hash[opts[:lines].keys.map {|x| [x, []] }]
-        bar = (0..total_subdivisions-1).inject(empty_bar) do |bar, index|
+        empty_notes = Hash[opts[:lines].keys.map {|x| [x, []] }]
+        notes = (0..resolve(opts[:subdivisions], i)-1).inject(empty_notes) do |notes, index|
           env = OpenStruct.new(
-            beat:       index / opts[:beat_subdivisions],
-            subdivision: index % opts[:beat_subdivisions]
+            subdivision: index,
+            bar:         i
           )
           opts[:lines].map do |key, f|
-            bar[key] << f[env]
+            notes[key] << f[env]
           end
-          bar
+          notes
         end
-        yielder.yield(bar)
+        yielder.yield(Bar.new(notes, *opts.values_at(:subdivisions, :unit, :time_signature, :beat_structure).map {|x| resolve(x, i) }))
+        i += 1
       end
+    end
+  end
+
+  def next
+    each.next
+  end
+
+  def self.construct(opts)
+    new(opts)
+  end
+
+  class Lilypond < Struct.new(:generator, :opts)
+    # Totally incomplete implementation
+    def duration(bar, x)
+      unit = bar.unit
+      [
+        unit,
+        unit / 2,
+        (unit / 2).to_s + ".",
+        unit / 4
+      ].map(&:to_s)[x-1] || raise("Unsupported duration: #{x}")
+    end
+
+    def to_lilypond
+      bar = nil
+      score = opts[:bars].times.map do
+        bar = generator.next 
+
+        lower = self.class.expand(hashslice(bar.notes, :kick, :snare))
+        upper = self.class.expand(hashslice(bar.notes, :hihat))
+
+#         $stderr.puts lower.inspect
+#         $stderr.puts upper.inspect
+#         $stderr.puts
+        [
+          format_notes(bar, upper),
+          format_notes(bar, lower),
+          bar
+        ]
+      end
+
+      upper_notes = score.map {|x| VoicePresenter.new(x[2], x[0]) }
+      lower_notes = score.map {|x| VoicePresenter.new(x[2], x[1]) }
+
+      preamble = nil
+      upper_voice = upper_notes.map do |note|
+        if preamble != note.preamble
+          preamble = note.preamble
+          preamble + note.notes
+        else
+          note.notes
+        end
+      end.join(" |\n ")
+
+      lower_voice = lower_notes.map do |note|
+        note.notes
+      end.join(" |\n ")
+
+
+      out = <<-LP
+        \\version "2.14.2"
+        \\new DrumStaff <<
+          \\new DrumVoice {
+            \\override Rest #'direction = #up
+            \\stemUp   \\drummode {
+
+            #{upper_voice}
+           \\bar "|."}}
+          \\new DrumVoice {
+            \\override Rest #'direction = #down
+            \\stemDown \\drummode {
+            #{lower_voice}
+            } \\bar "|."}
+        >>
+      LP
+    end
+
+    class VoicePresenter < Struct.new(:bar, :notes)
+      def beat_structure
+        structure = bar.beat_structure
+        if structure
+          "\\set Staff.beatStructure = #'(%s)" % structure.join(' ')
+        end
+      end
+
+      def time_signature
+        "\\time %s" % (bar.time_signature || "4/4")
+      end
+
+      def preamble
+        [
+          time_signature,
+          beat_structure,
+        ].compact.join("\n") + "\n"
+      end
+    end
+
+    def mappings
+      {
+        kick:  'bd',
+        snare: 'sn',
+        hihat: 'hh'
+      }
+    end
+
+    def format_notes(bar, notes)
+      notes.map do |note|
+        if note[0].length == 1
+          mappings[note[0][0]] + duration(bar, note[1]).to_s
+        elsif note[0].length > 1
+          "<%s>%s" % [
+            note[0].map {|x| mappings[x] }.join(' '),
+            duration(bar, note[1])
+          ]
+        else
+          "r%s" % duration(bar, note[1])
+        end
+      end.join(" ")
+    end
+
+    def hashslice(hash, *keep_keys)
+      h = {}
+      keep_keys.each do |key|
+        h[key] = hash[key] if hash.has_key?(key)
+      end
+      h
+    end
+    def self.expand(notes)
+      accum = []
+      time  = 0
+      out = notes.values.transpose.inject([]) do |out, on_notes|
+        on = [*on_notes].map.with_index do |x, i|
+          notes.keys[i] if x
+        end.compact
+
+        if !on.empty? || time >= 4
+          if time > 0
+            out << [accum, time]
+          end
+          accum = on
+          time = 0
+        end
+        time += 1
+
+        out
+      end
+
+      out << [accum, time] if time > 0
+      out
     end
   end
 end
