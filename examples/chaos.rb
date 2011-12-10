@@ -12,11 +12,11 @@ templates = [
 bars = 16.times.map { templates.sample }
 
 generator = Roborabb.construct(
-  subdivisions:   L{|i| bars[i % bars.length][0] },
-  unit:           L{|i| bars[i % bars.length][1] },
-  time_signature: L{|i| bars[i % bars.length][2] },
-  beat_structure: L{|i| bars[i % bars.length][3] },
-  lines: {
+  subdivisions:   L{|bar| bars[bar.index % bars.length][0] },
+  unit:           L{|bar| bars[bar.index % bars.length][1] },
+  time_signature: L{|bar| bars[bar.index % bars.length][2] },
+  beat_structure: L{|bar| bars[bar.index % bars.length][3] },
+  notes: {
     hihat: L{|env| rand >= 1 - density },
     kick:  L{|env| rand >= 1 - density},
     snare: L{|env| rand >= 1 - density }

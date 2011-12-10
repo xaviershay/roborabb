@@ -5,7 +5,7 @@ rock_1 = Roborabb.construct(
   subdivisions:   8,
   unit:           8,
   time_signature: "4/4",
-  lines: {
+  notes: {
     hihat: L{|env| true },
     kick:  L{|env|
        (env.subdivision % 4 == 0) ||

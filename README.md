@@ -12,7 +12,7 @@ Example
       subdivisions:   8,
       unit:           8,
       time_signature: "4/4",
-      lines: {
+      notes: {
         hihat: L{|env| true },
         kick:  L{|env| (env.subdivision + 0) % 4 == 0 },
         snare: L{|env| (env.subdivision + 2) % 4 == 0 },
