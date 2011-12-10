@@ -26,17 +26,21 @@ class Roborabb
     attr_accessor :generator, :opts
 
     def format_bars(bars, voice)
-      last_bar = Bar.new({})
+      last_plan = Bar.new({})
       bars.map do |bar|
+        plan = bar[:bar]
+
         preamble = ""
-        if last_bar.time_signature != bar[:bar].time_signature
-          preamble += %(\\time #{bar[:bar].time_signature}\n)
+        if last_plan.time_signature != plan.time_signature
+          preamble += %(\\time #{plan.time_signature}\n)
         end
 
-        if last_bar.beat_structure != bar[:bar].beat_structure
-          preamble += %(\\set Staff.beatStructure = #'(%s)\n) % bar[:bar].beat_structure.join(' ')
+        if last_plan.beat_structure != plan.beat_structure && plan.beat_structure
+          preamble += %(\\set Staff.beatStructure = #'(%s)\n) % [
+            plan.beat_structure.join(' ')
+          ]
         end
-        last_bar = bar[:bar]
+        last_plan = plan
 
         preamble + bar[voice]
       end.join(' | ') + ' \\bar "|."'

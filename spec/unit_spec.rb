@@ -222,6 +222,16 @@ describe Roborabb::Lilypond do
       bars[2].should     include(%(\\set Staff.beatStructure = #'(2 3)))
     end
 
+    it 'does not include beat structure if none provided' do
+      generator = [
+        bar(beat_structure: [3, 2]),
+        bar(beat_structure: nil)
+      ]
+      bars = output(generator, bars: 2).split('|')
+      bars[0].should     include(%(\\set Staff.beatStructure = #'(3 2)))
+      bars[1].should_not include(%(\\set Staff.beatStructure))
+    end
+
     it 'includes a final double bar line' do
       output([bar]).should include(' \\bar "|."')
     end
