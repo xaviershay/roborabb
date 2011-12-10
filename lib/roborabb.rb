@@ -1,140 +1,84 @@
 require 'ostruct'
 alias :L :lambda
 
-class Roborabb < Struct.new(:opts)
-  include Enumerable
-
-  class Bar < Struct.new(:notes, :subdivisions, :unit, :time_signature, :beat_structure)
-  end
-
-  def resolve(x, i)
-    if x.respond_to?(:call)
-      x.call(i)
-    else
-      x
-    end
-  end
-
-  def each
-    @each ||= Enumerator.new do |yielder|
-      i = 0
-      while true
-        empty_notes = Hash[opts[:lines].keys.map {|x| [x, []] }]
-        notes = (0..resolve(opts[:subdivisions], i)-1).inject(empty_notes) do |notes, index|
-          env = OpenStruct.new(
-            subdivision: index,
-            bar:         i
-          )
-          opts[:lines].map do |key, f|
-            notes[key] << f[env]
-          end
-          notes
-        end
-        yielder.yield(Bar.new(notes, *opts.values_at(:subdivisions, :unit, :time_signature, :beat_structure).map {|x| resolve(x, i) }))
-        i += 1
-      end
-    end
-  end
-
-  def next
-    each.next
-  end
-
-  def self.construct(opts)
-    new(opts)
-  end
-
-  class Lilypond < Struct.new(:generator, :opts)
-    # Totally incomplete implementation
-    def duration(bar, x)
-      unit = bar.unit
-      [
-        unit,
-        unit / 2,
-        (unit / 2).to_s + ".",
-        unit / 4
-      ].map(&:to_s)[x-1] || raise("Unsupported duration: #{x}")
+class Roborabb
+  class Lilypond
+    def initialize(generator, opts)
+      self.generator = generator
+      self.opts      = opts
     end
 
     def to_lilypond
-      bar = nil
       score = opts[:bars].times.map do
-        bar = generator.next 
+        bar = generator.next
 
-        lower = self.class.expand(hashslice(bar.notes, :kick, :snare))
-        upper = self.class.expand(hashslice(bar.notes, :hihat))
-
-#         $stderr.puts lower.inspect
-#         $stderr.puts upper.inspect
-#         $stderr.puts
-        [
-          format_notes(bar, upper),
-          format_notes(bar, lower),
-          bar
-        ]
+        format_bar(bar)
       end
 
-      upper_notes = score.map {|x| VoicePresenter.new(x[2], x[0]) }
-      lower_notes = score.map {|x| VoicePresenter.new(x[2], x[1]) }
+      lilypond do
+        voice(:up)   { format_bars(score, :upper) } +
+        voice(:down) { format_bars(score, :lower) }
+      end
+    end
 
-      preamble = nil
-      upper_voice = upper_notes.map do |note|
-        if preamble != note.preamble
-          preamble = note.preamble
-          preamble + note.notes
-        else
-          note.notes
+    protected
+
+    attr_accessor :generator, :opts, :title
+
+    def format_bars(bars, voice)
+      last_plan = Bar.new({})
+      bars.map do |bar|
+        plan = bar[:bar]
+
+        preamble = ""
+        if last_plan.time_signature != plan.time_signature
+          preamble += %(\\time #{plan.time_signature}\n)
         end
-      end.join(" |\n ")
 
-      lower_voice = lower_notes.map do |note|
-        note.notes
-      end.join(" |\n ")
+        if last_plan.beat_structure != plan.beat_structure && plan.beat_structure
+          preamble += %(\\set Staff.beatStructure = #'(%s)\n) % [
+            plan.beat_structure.join(' ')
+          ]
+        end
+        last_plan = plan
+        self.title = plan.title
 
+        preamble + bar[voice]
+      end.join(' | ') + ' \\bar "|."'
+    end
 
-      out = <<-LP
-        \\version "2.14.2"
-        \\new DrumStaff <<
-          \\new DrumVoice {
-            \\override Rest #'direction = #up
-            \\stemUp   \\drummode {
+    def lilypond
+      # Evaluating the content first is necessary to infer the title.
+      content = yield
 
-            #{upper_voice}
-           \\bar "|."}}
-          \\new DrumVoice {
-            \\override Rest #'direction = #down
-            \\stemDown \\drummode {
-            #{lower_voice}
-            } \\bar "|."}
-        >>
+      <<-LP
+      \\version "2.14.2"
+      \\header {
+        title = "#{title}"
+        subtitle = " "
+      }
+      \\new DrumStaff <<
+        #{content}
+      >>
       LP
     end
 
-    class VoicePresenter < Struct.new(:bar, :notes)
-      def beat_structure
-        structure = bar.beat_structure
-        if structure
-          "\\set Staff.beatStructure = #'(%s)" % structure.join(' ')
-        end
-      end
-
-      def time_signature
-        "\\time %s" % (bar.time_signature || "4/4")
-      end
-
-      def preamble
-        [
-          time_signature,
-          beat_structure,
-        ].compact.join("\n") + "\n"
-      end
+    def voice(direction)
+      result = <<-LP
+      \\new DrumVoice {
+        \\override Rest #'direction = ##{direction}
+        \\stem#{direction == :up ? "Up" : "Down"}   \\drummode {
+          #{yield}
+        }
+      }
+      LP
     end
 
-    def mappings
+    def format_bar(bar)
       {
-        kick:  'bd',
-        snare: 'sn',
-        hihat: 'hh'
+        bar:   bar,
+        upper: format_notes(bar, expand(hashslice(bar.notes, :hihat))),
+        lower: format_notes(bar, expand(hashslice(bar.notes, :kick, :snare)))
       }
     end
 
@@ -153,6 +97,24 @@ class Roborabb < Struct.new(:opts)
       end.join(" ")
     end
 
+    def mappings
+      {
+        kick:  'bd',
+        snare: 'sn',
+        hihat: 'hh'
+      }
+    end
+
+    def duration(bar, x)
+      unit = bar.unit
+      [
+        unit,
+        unit / 2,
+        (unit / 2).to_s + ".",
+        unit / 4
+      ].map(&:to_s)[x-1] || raise("Unsupported duration: #{x}")
+    end
+
     def hashslice(hash, *keep_keys)
       h = {}
       keep_keys.each do |key|
@@ -160,7 +122,8 @@ class Roborabb < Struct.new(:opts)
       end
       h
     end
-    def self.expand(notes)
+
+    def expand(notes)
       accum = []
       time  = 0
       out = notes.values.transpose.inject([]) do |out, on_notes|
@@ -184,4 +147,103 @@ class Roborabb < Struct.new(:opts)
       out
     end
   end
+
+  class Bar
+    ATTRIBUTES = [
+      :beat_structure,
+      :notes,
+      :subdivisions,
+      :time_signature,
+      :title,
+      :unit,
+    ]
+    attr_reader *ATTRIBUTES
+
+    def initialize(attributes)
+      ATTRIBUTES.each do |x|
+        send("#{x}=", attributes[x])
+      end
+    end
+
+    protected
+
+    attr_writer *ATTRIBUTES
+  end
+
+  attr_reader :plan
+
+  def initialize(plan_hash)
+    self.plan       = OpenStruct.new(plan_hash)
+    self.bar_env    = OpenStruct.new(index: 0)
+    self.enumerator = Enumerator.new do |yielder|
+      loop do
+        yielder.yield(generate_bar)
+        bar_env.index += 1
+      end
+    end
+  end
+
+  def next
+    enumerator.next
+  end
+
+  def self.construct(plan)
+    unless plan.has_key?(:notes)
+      raise(ArgumentError, "Plan does not contain :notes")
+    end
+    new(plan)
+  end
+
+  protected
+
+  def generate_bar
+    notes = subdivisions.inject(empty_notes) do |notes, subdivision|
+      env = build_env(subdivision)
+
+      plan.notes.map do |name, f|
+        notes[name] << resolve(f, env)
+      end
+
+      notes
+    end
+
+    Bar.new(
+      subdivisions:   subdivisions.max + 1,
+      unit:           resolve(plan.unit, bar_env),
+      time_signature: resolve(plan.time_signature, bar_env),
+      beat_structure: resolve(plan.beat_structure, bar_env),
+      title:          resolve(plan.title, bar_env),
+      notes:          notes
+    )
+  end
+
+  def resolve(f, env)
+    if f.respond_to?(:call)
+      f.call(env)
+    else
+      f
+    end
+  end
+
+  def subdivisions
+    (0...resolve(plan.subdivisions, bar_env))
+  end
+
+  def empty_notes
+    x = plan.notes.keys.map do |name|
+      [name, []]
+    end
+    Hash[x]
+  end
+
+  def build_env(subdivision)
+    OpenStruct.new(
+      subdivision: subdivision,
+      bar:         bar_env
+    )
+  end
+
+  attr_writer :plan
+  attr_accessor :enumerator
+  attr_accessor :bar_env
 end
