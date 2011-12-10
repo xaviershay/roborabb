@@ -1,10 +1,16 @@
 Roborabb
 ========
 
-Generates drumming practice charts in lilypond notation.
+Generates drumming practice charts in [lilypond][lilypond] notation.
 
 Example
 -------
+
+Install the gem:
+
+    gem install roborabb
+
+Then use it:
 
     require 'roborabb'
 
@@ -22,9 +28,25 @@ Example
 
     puts Roborabb::Lilypond.new(rock_1, bars: 16).to_lilypond
 
+The resulting file is immediately compilable with [lilypond][lilypond]:
+
+    ruby examples/rock.rb > rock.ly && lilypond rock.ly # Generates rock.pdf
+
 See `examples` directory for more.
+
+[lilypond]: http://lilypond.org/
+
+Compatibility
+-------------
+
+Only tested on ruby 1.9.3. Require 1.9, since it uses new style hashes.
 
 Developing
 ----------
 
-Requires ruby 1.9.
+    git clone git://github.com/xaviershay/roborabb.git
+    bundle           # Install development dependencies
+    bundle exec rake # Runs the specs
+
+Any big new features require an acceptance test, bug fixes should only require
+unit tests. Follow the conventions already present.
