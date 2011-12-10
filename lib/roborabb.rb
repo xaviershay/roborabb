@@ -55,7 +55,7 @@ class Roborabb2
       result = <<-LP
       \\new DrumVoice {
         \\override Rest #'direction = ##{direction}
-        \\stemUp   \\drummode {
+        \\stem#{direction == :up ? "Up" : "Down"}   \\drummode {
           #{yield}
         }
       }

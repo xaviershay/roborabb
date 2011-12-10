@@ -171,8 +171,9 @@ describe Roborabb2::Lilypond do
       voices = output(generator).split("\\new DrumVoice")[1..-1]
       voices[0].should include("hh8 hh8")
       voices[0].should include("\\override Rest #'direction = #up")
+      voices[0].should include("\\stemUp")
       voices[1].should include("bd8 sn8")
-      voices[1].should include("\\override Rest #'direction = #down")
+      voices[1].should include("\\stemDown")
     end
 
     it 'includes bar lines' do
