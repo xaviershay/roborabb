@@ -3,6 +3,10 @@ Roborabb
 
 Generates drumming practice charts in [lilypond][lilypond] notation.
 
+<img
+  src="https://img.skitch.com/20111210-n7ey6x4jrmiaq11tjj1j8qqd4u.jpg"
+  alt='example score' />
+
 Example
 -------
 
@@ -31,10 +35,6 @@ Then use it:
 The resulting file is immediately compilable with [lilypond][lilypond]:
 
     ruby examples/rock.rb > rock.ly && lilypond rock.ly # Generates rock.pdf
-
-<img
-  src="https://img.skitch.com/20111210-n7ey6x4jrmiaq11tjj1j8qqd4u.jpg"
-  alt='example score' />
 
 See `examples` directory for more.
 
