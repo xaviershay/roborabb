@@ -6,13 +6,25 @@ describe Roborabb do
     rabb.next.notes
   end
 
-  def construct(attributes)
-    Roborabb.construct({
+  def default_attributes
+    {
       subdivisions:   2,
       unit:           8,
       time_signature: '1/4',
       notes:          {}
-    }.merge(attributes))
+    }
+  end
+
+  def construct(attributes)
+    Roborabb.construct(default_attributes.merge(attributes))
+  end
+
+  describe '#construct' do
+    it 'raises Argument error when no :notes given' do
+      lambda {
+        Roborabb.construct(default_attributes.delete_if {|k, _| k == :notes })
+      }.should raise_error(ArgumentError)
+    end
   end
 
   describe '#next' do

@@ -169,6 +169,9 @@ class Roborabb
   end
 
   def self.construct(plan)
+    unless plan.has_key?(:notes)
+      raise(ArgumentError, "Plan does not contain :notes")
+    end
     new(plan)
   end
 
