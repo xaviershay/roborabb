@@ -39,7 +39,7 @@ class Roborabb2
         last_bar = bar[:bar]
 
         preamble + bar[voice]
-      end.join(' | ') + '\\bar "|."'
+      end.join(' | ') + ' \\bar "|."'
     end
 
     def lilypond

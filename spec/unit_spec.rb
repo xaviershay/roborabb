@@ -210,7 +210,7 @@ describe Roborabb2::Lilypond do
     end
 
     it 'includes a final double bar line' do
-      output([bar]).should include('\\bar "|."')
+      output([bar]).should include(' \\bar "|."')
     end
   end
 end
