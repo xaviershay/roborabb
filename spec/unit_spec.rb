@@ -108,6 +108,16 @@ describe Roborabb do
       rabb = construct(beat_structure: L{|e| [3, 2, 2] })
       rabb.next.beat_structure.should == [3, 2, 2]
     end
+
+    it 'includes title in returned object' do
+      rabb = construct(title: "Hello")
+      rabb.next.title.should == "Hello"
+    end
+
+    it 'includes generated title in returned object' do
+      rabb = construct(title: L{|e| "Hello" })
+      rabb.next.title.should == "Hello"
+    end
   end
 
 end
@@ -116,6 +126,7 @@ describe Roborabb::Lilypond do
   describe '#to_lilypond' do
     def bar(attributes = {})
       double("Bar", {
+        title:          nil,
         unit:           8,
         notes:          {hihat: [true]},
         time_signature: "4/4",
@@ -234,6 +245,15 @@ describe Roborabb::Lilypond do
 
     it 'includes a final double bar line' do
       output([bar]).should include(' \\bar "|."')
+    end
+
+    it "includes the final bar's title as the document title" do
+      lilypond = output([
+        bar(title: 'Wrong'),
+        bar(title: 'Hello'),
+      ], bars: 2)
+      lilypond.should     include(%(title = "Hello"))
+      lilypond.should_not include("Wrong")
     end
   end
 end

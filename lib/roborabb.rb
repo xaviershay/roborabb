@@ -23,7 +23,7 @@ class Roborabb
 
     protected
 
-    attr_accessor :generator, :opts
+    attr_accessor :generator, :opts, :title
 
     def format_bars(bars, voice)
       last_plan = Bar.new({})
@@ -41,16 +41,24 @@ class Roborabb
           ]
         end
         last_plan = plan
+        self.title = plan.title
 
         preamble + bar[voice]
       end.join(' | ') + ' \\bar "|."'
     end
 
     def lilypond
+      # Evaluating the content first is necessary to infer the title.
+      content = yield
+
       <<-LP
       \\version "2.14.2"
+      \\header {
+        title = "#{title}"
+        subtitle = " "
+      }
       \\new DrumStaff <<
-        #{yield}
+        #{content}
       >>
       LP
     end
@@ -141,7 +149,14 @@ class Roborabb
   end
 
   class Bar
-    ATTRIBUTES = [:notes, :subdivisions, :unit, :time_signature, :beat_structure]
+    ATTRIBUTES = [
+      :beat_structure,
+      :notes,
+      :subdivisions,
+      :time_signature,
+      :title,
+      :unit,
+    ]
     attr_reader *ATTRIBUTES
 
     def initialize(attributes)
@@ -197,6 +212,7 @@ class Roborabb
       unit:           resolve(plan.unit, bar_env),
       time_signature: resolve(plan.time_signature, bar_env),
       beat_structure: resolve(plan.beat_structure, bar_env),
+      title:          resolve(plan.title, bar_env),
       notes:          notes
     )
   end
