@@ -54,3 +54,8 @@ Developing
 
 Any big new features require an acceptance test, bug fixes should only require
 unit tests. Follow the conventions already present.
+
+Status
+------
+
+New, but complete.
