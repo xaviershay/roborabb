@@ -15,7 +15,7 @@ describe 'outputting to lilypond' do
     )
     ly = Roborabb2::Lilypond.new(rabb, bars: 2)
     output = ly.to_lilypond.lines.map(&:chomp).join
-    output.should include('\\time "4/4"')
+    output.should include('\\time 4/4')
     output.should include('hh8 hh8 hh8 hh8 | hh8 hh8 hh8 hh8')
     output.should include('bd4 sn4 | bd4 sn4')
   end

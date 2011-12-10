@@ -192,9 +192,9 @@ describe Roborabb2::Lilypond do
         bar(time_signature: "1/4"),
       ]
       bars = output(generator, bars: 3).split('|')
-      bars[0].should     include(%(\\time "1/8"))
+      bars[0].should     include(%(\\time 1/8))
       bars[1].should_not include(%(\\time))
-      bars[2].should     include(%(\\time "1/4"))
+      bars[2].should     include(%(\\time 1/4))
     end
 
     it 'includes beat structure changes per bar' do

@@ -30,7 +30,7 @@ class Roborabb2
       bars.map do |bar|
         preamble = ""
         if last_bar.time_signature != bar[:bar].time_signature
-          preamble += %(\\time "#{bar[:bar].time_signature}"\n)
+          preamble += %(\\time #{bar[:bar].time_signature}\n)
         end
 
         if last_bar.beat_structure != bar[:bar].beat_structure
