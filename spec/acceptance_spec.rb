@@ -3,7 +3,7 @@ require 'roborabb'
 
 describe 'outputting to lilypond' do
   it 'outputs a basic rock beat' do
-    rabb = Roborabb2.construct(
+    rabb = Roborabb.construct(
       subdivisions:   8,
       unit:           8,
       time_signature: "4/4",
@@ -13,7 +13,7 @@ describe 'outputting to lilypond' do
         snare: L{|env| (env.subdivision + 2) % 4 == 0 },
       }
     )
-    ly = Roborabb2::Lilypond.new(rabb, bars: 2)
+    ly = Roborabb::Lilypond.new(rabb, bars: 2)
     output = ly.to_lilypond.lines.map(&:chomp).join
     output.should include('\\time 4/4')
     output.should include('hh8 hh8 hh8 hh8 | hh8 hh8 hh8 hh8')

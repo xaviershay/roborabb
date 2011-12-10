@@ -1,13 +1,13 @@
 $LOAD_PATH.unshift(File.expand_path("../../lib", __FILE__))
 require 'roborabb'
 
-describe Roborabb2 do
+describe Roborabb do
   def notes(rabb)
     rabb.next.notes
   end
 
   def construct(attributes)
-    Roborabb2.construct({
+    Roborabb.construct({
       subdivisions:   2,
       unit:           8,
       time_signature: '1/4',
@@ -100,7 +100,7 @@ describe Roborabb2 do
 
 end
 
-describe Roborabb2::Lilypond do
+describe Roborabb::Lilypond do
   describe '#to_lilypond' do
     def bar(attributes = {})
       double("Bar", {
