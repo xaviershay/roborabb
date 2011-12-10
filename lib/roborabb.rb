@@ -1,6 +1,8 @@
 require 'ostruct'
 alias :L :lambda
 
+require 'roborabb/version'
+
 class Roborabb
   class Lilypond
     def initialize(generator, opts)
