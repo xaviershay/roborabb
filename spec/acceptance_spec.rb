@@ -8,9 +8,9 @@ describe 'outputting to lilypond' do
       unit:           8,
       time_signature: "4/4",
       notes: {
-        hihat: L{|env| true },
-        kick:  L{|env| (env.subdivision + 0) % 4 == 0 },
-        snare: L{|env| (env.subdivision + 2) % 4 == 0 },
+        hihat: ->(env) { true },
+        kick:  ->(env) { (env.subdivision + 0) % 4 == 0 },
+        snare: ->(env) { (env.subdivision + 2) % 4 == 0 },
       }
     )
     ly = Roborabb::Lilypond.new(rabb, bars: 2)

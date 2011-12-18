@@ -50,7 +50,7 @@ describe Roborabb do
 
     it 'includes bar number in env yielded to config' do
       rabb = construct(
-        subdivisions: L{|e| e.index + 1 },
+        subdivisions: ->(e) { e.index + 1 },
         notes:        { a: 1 }
       )
 
@@ -64,7 +64,7 @@ describe Roborabb do
     it 'includes bar number in env yielded to notes' do
       rabb = construct(
         subdivisions: 2,
-        notes:        { a: L{|e| e.bar.index } }
+        notes:        { a: ->(e) { e.bar.index } }
       )
 
       3.times.map { notes(rabb) }.should == [
@@ -85,7 +85,7 @@ describe Roborabb do
     end
 
     it 'includes generated unit in returned object' do
-      rabb = construct(unit: L{|e| 8 })
+      rabb = construct(unit: ->(e) { 8 })
       rabb.next.unit.should == 8
     end
 
@@ -95,7 +95,7 @@ describe Roborabb do
     end
 
     it 'includes generated time_signature in returned object' do
-      rabb = construct(time_signature: L{|e| "7/8" })
+      rabb = construct(time_signature: ->(e) { "7/8" })
       rabb.next.time_signature.should == "7/8"
     end
 
@@ -105,7 +105,7 @@ describe Roborabb do
     end
 
     it 'includes generated beat_structure in returned object' do
-      rabb = construct(beat_structure: L{|e| [3, 2, 2] })
+      rabb = construct(beat_structure: ->(e) { [3, 2, 2] })
       rabb.next.beat_structure.should == [3, 2, 2]
     end
 
@@ -115,7 +115,7 @@ describe Roborabb do
     end
 
     it 'includes generated title in returned object' do
-      rabb = construct(title: L{|e| "Hello" })
+      rabb = construct(title: ->(e) { "Hello" })
       rabb.next.title.should == "Hello"
     end
   end

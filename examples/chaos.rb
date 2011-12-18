@@ -11,9 +11,9 @@ templates = [
 ]
 
 bars        = 16.times.map { templates.sample }
-random_note = L{|env| rand >= 1 - density }
-random_bar  = L{|index|
-  L{|bar| bars[bar.index % bars.length][index] }
+random_note = ->(env) { rand >= 1 - density }
+random_bar  = ->(index) {
+  ->(bar) { bars[bar.index % bars.length][index] }
 }
 
 generator = Roborabb.construct(

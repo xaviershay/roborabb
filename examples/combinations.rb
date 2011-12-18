@@ -10,13 +10,13 @@ generator = Roborabb.construct(
   unit:           16,
   time_signature: "4/4",
   notes: {
-    hihat: L{|env|
+    hihat: ->(env) {
       states[(env.bar.index / lower_states.length) % states.length][env.subdivision % 4]
     },
-    kick:  L{|env|
+    kick:  ->(env) {
       lower_states[env.bar.index % lower_states.length][env.subdivision % 4] == 1
     },
-    snare: L{|env|
+    snare: ->(env) {
       lower_states[env.bar.index % lower_states.length][env.subdivision % 4] == 2
     }
   }

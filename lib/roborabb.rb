@@ -1,6 +1,5 @@
 require 'roborabb/version'
 
-require 'roborabb/core_ext'
 require 'roborabb/builder'
 require 'roborabb/lilypond'
 
