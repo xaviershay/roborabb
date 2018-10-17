@@ -45,7 +45,7 @@ See `examples` directory for more.
 Compatibility
 -------------
 
-Only tested on ruby 1.9.3. Require 1.9, since it uses new style hashes.
+Only tested on ruby 1.9.3. Requires 1.9, since it uses new style hashes.
 
 Developing
 ----------
