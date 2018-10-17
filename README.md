@@ -4,7 +4,7 @@ Roborabb
 Generates drumming practice charts in [lilypond][lilypond] notation.
 
 <img
-  src="https://img.skitch.com/20111210-n7ey6x4jrmiaq11tjj1j8qqd4u.jpg"
+  src="https://i.imgur.com/7clUyJr.png"
   alt='example score' />
 
 Example
