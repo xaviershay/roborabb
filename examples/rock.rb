@@ -1,6 +1,8 @@
 $LOAD_PATH.unshift(File.expand_path("../../lib", __FILE__))
 require 'roborabb'
 
+# Some simple rock beats to warm you up.
+
 rock_1 = Roborabb.construct(
   title:          "Rock",
   subdivisions:   8,

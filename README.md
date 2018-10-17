@@ -34,6 +34,8 @@ Then use it:
 
 The resulting file is immediately compilable with [lilypond][lilypond]:
 
+    sudo apt install lilypond # ubuntu lilypond install
+
     ruby examples/rock.rb > rock.ly && lilypond rock.ly # Generates rock.pdf
 
 See `examples` directory for more.

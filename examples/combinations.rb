@@ -1,6 +1,9 @@
 $LOAD_PATH.unshift(File.expand_path("../../lib", __FILE__))
 require 'roborabb'
 
+# Some technical bullshit to slog through: every combination of hats, kicks
+# and snares.
+
 states       = ([true, false] * 4).combination(4).to_a.uniq
 lower_states = ([0, 1, 2]     * 4).combination(4).to_a.uniq
 

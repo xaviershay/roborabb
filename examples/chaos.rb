@@ -1,6 +1,8 @@
 $LOAD_PATH.unshift(File.expand_path("../../lib", __FILE__))
 require 'roborabb'
 
+# lol let's go
+
 density = 0.5
 
 SUBDIVISION, UNIT, TIME_SIGNATURE, BEAT_STRUCTURE = *0..3

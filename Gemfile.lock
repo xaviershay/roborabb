@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    roborabb (0.0.1)
+    roborabb (1.0.0)
 
 GEM
   remote: http://rubygems.org/
@@ -24,3 +24,6 @@ DEPENDENCIES
   rake
   roborabb!
   rspec (~> 2.0)
+
+BUNDLED WITH
+   1.16.1
